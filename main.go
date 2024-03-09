@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// var conn *pgx.Conn
 var conn *pgxpool.Pool
 
 func handleCliente(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +64,6 @@ func main() {
 		fmt.Println("Tentativa conectar banco: ", retries)
 
 		dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
-		// conn, err = pgx.Connect(context.Background(), dsn)
 		conn, err = pgxpool.New(context.Background(), dsn)
 
 		if err == nil || retries > 5 {
@@ -81,7 +79,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Erro ao conectar com o banco de dados: %v\n", err)
 		return
 	}
-	// defer conn.Close(context.Background())
 	defer conn.Close()
 
 	http.HandleFunc("/clientes/", handleCliente)

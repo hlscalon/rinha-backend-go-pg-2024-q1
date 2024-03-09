@@ -25,7 +25,6 @@ const QUERY_INSERIR_TRANSACAO_DEBITAR = "WITH cliente_atualizado AS (%s) " +
 	"FROM cliente_atualizado " +
 	"RETURNING limite_atual, saldo_atual"
 
-// func handleTransacao(clienteId int, conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
 func handleTransacao(clienteId int, conn *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
