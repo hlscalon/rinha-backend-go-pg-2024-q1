@@ -38,7 +38,7 @@ func handleTransacao(clienteId int, conn *pgxpool.Pool, w http.ResponseWriter, r
 		return
 	}
 
-	if len(transacao.Descricao) > 10 || (transacao.Tipo != "c" && transacao.Tipo != "d") {
+	if len(transacao.Descricao) < 1 || len(transacao.Descricao) > 10 || (transacao.Tipo != "c" && transacao.Tipo != "d") {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
