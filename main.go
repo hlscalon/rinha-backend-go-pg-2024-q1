@@ -56,6 +56,7 @@ func main() {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
+	serverPort := os.Getenv("SERVER_PORT")
 
 	var err error
 	for {
@@ -83,9 +84,9 @@ func main() {
 
 	http.HandleFunc("/clientes/", handleCliente)
 
-	fmt.Println("Servidor rodando na porta 9000...")
+	fmt.Printf("Servidor rodando na porta %s...\n", serverPort)
 
-	err = http.ListenAndServe(":9000", nil)
+	err = http.ListenAndServe(":"+serverPort, nil)
 
 	if err != nil {
 		fmt.Println("Erro ao iniciar servidor")

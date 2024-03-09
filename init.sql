@@ -1,6 +1,3 @@
--- TESTAR
--- CREATE DOMAIN uint 
-	-- CHECK(VALUE >= 0 AND VALUE <= 2^32)
 
 CREATE UNLOGGED TABLE cliente (
 	id SERIAL PRIMARY KEY,
@@ -32,7 +29,8 @@ VALUES
 	('padaria joia de cocaia', 100000 * 100),
 	('kid mais', 5000 * 100);
 
--- Verificar necessidade
+-- Insere valores iniciais
 INSERT INTO transacao (cliente_id, valor, tipo, descricao, limite_atual, saldo_atual)
-  SELECT id, 0, 'c', 'inicial', limite, saldo
+  SELECT id, 0, 'c', 'inicio', limite, saldo
   FROM cliente;
+  
