@@ -15,7 +15,7 @@ const QUERY_OBTER_TRANSACOES = "SELECT valor, tipo, descricao, realizada_em, lim
 	"FROM transacao " +
 	"WHERE cliente_id = $1 " +
 	"ORDER BY id DESC " +
-	"LIMIT 10 "
+	"LIMIT 11 " // Deve pegar uma a mais para ignorar a inicial depois, se necessário
 
 func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -44,11 +44,19 @@ func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	limiteAtual := ultimasTransacoes[0].LimiteAtual
+	saldoAtual := ultimasTransacoes[0].SaldoAtual
+
+	// Sempre remove a última transação
+	// Se tem 11 transações, remove e fica com 10 (nenhuma sendo a inicial)
+	// Se tem menos, remove a última, que será sempre o saldo inicial
+	ultimasTransacoes = ultimasTransacoes[:len(ultimasTransacoes)-1]
+
 	response := &ExtratoResponse{
 		Saldo: SaldoExtratoResponse{
 			DataExtrato: time.Now(),
-			Limite:      ultimasTransacoes[0].LimiteAtual,
-			Total:       ultimasTransacoes[0].SaldoAtual,
+			Limite:      limiteAtual,
+			Total:       saldoAtual,
 		},
 		UltimasTransacoes: ultimasTransacoes,
 	}

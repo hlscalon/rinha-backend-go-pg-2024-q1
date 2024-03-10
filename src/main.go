@@ -56,28 +56,33 @@ func (app *App) handleCliente(w http.ResponseWriter, r *http.Request) {
 }
 
 func createDB() (conn *pgxpool.Pool, err error) {
-	for {
-		retries := 1
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
+	conn, err = pgxpool.New(context.Background(), dsn)
 
+	if err != nil {
+		return nil, err
+	}
+
+	retries := 1
+	for {
 		fmt.Println("Tentativa conectar banco: ", retries)
 
-		dsn := fmt.Sprintf(
-			"postgres://%s:%s@%s:%s/%s",
-			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_HOST"),
-			os.Getenv("DB_PORT"),
-			os.Getenv("DB_NAME"),
-		)
-		conn, err = pgxpool.New(context.Background(), dsn)
+		err = conn.Ping(context.Background())
 
-		if err == nil || retries > 5 {
+		if err == nil || retries >= 20 {
 			break
 		}
 
-		// Espera 3 segs e tenta novamente
-		time.Sleep(time.Second * 3)
-		retries += 1
+		// Espera 5 segs e tenta novamente
+		time.Sleep(time.Second * 5)
+		retries++
 	}
 
 	return
@@ -87,6 +92,7 @@ func main() {
 	conn, err := createDB()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao conectar com o banco de dados: %v\n", err)
+		return
 	}
 
 	defer conn.Close()

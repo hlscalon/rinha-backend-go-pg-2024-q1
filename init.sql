@@ -31,6 +31,6 @@ VALUES
 
 -- Insere valores iniciais
 INSERT INTO transacao (cliente_id, valor, tipo, descricao, limite_atual, saldo_atual)
-  SELECT id, 0, 'c', 'inicio', limite, saldo
+  SELECT id, 0, 'i', 'inicial', limite, saldo
   FROM cliente;
   
