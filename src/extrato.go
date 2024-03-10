@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const QUERY_OBTER_TRANSACOES = "SELECT valor, tipo, descricao, realizada_em, limite_atual, saldo_atual " +
@@ -18,13 +17,13 @@ const QUERY_OBTER_TRANSACOES = "SELECT valor, tipo, descricao, realizada_em, lim
 	"ORDER BY id DESC " +
 	"LIMIT 10 "
 
-func handleExtrato(clienteId int, conn *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
+func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	rows, err := conn.Query(context.Background(), QUERY_OBTER_TRANSACOES, clienteId)
+	rows, err := app.conn.Query(context.Background(), QUERY_OBTER_TRANSACOES, app.clienteId)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro extrato: %v\n", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)

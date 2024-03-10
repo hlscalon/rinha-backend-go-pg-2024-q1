@@ -12,9 +12,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var conn *pgxpool.Pool
+type App struct {
+	conn      *pgxpool.Pool
+	clienteId int
+}
 
-func handleCliente(w http.ResponseWriter, r *http.Request) {
+func (app *App) handleCliente(w http.ResponseWriter, r *http.Request) {
 	// Tratar os seguintes casos:
 	// 	- /clientes/{id}/transacoes
 	// 	- /clientes/{id}/extrato
@@ -39,32 +42,33 @@ func handleCliente(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.clienteId = id
+
 	if parts[3] == "transacoes" {
-		handleTransacao(id, conn, w, r)
+		app.handleTransacao(w, r)
 		return
 	} else if parts[3] == "extrato" {
-		handleExtrato(id, conn, w, r)
+		app.handleExtrato(w, r)
 		return
 	}
 
 	w.WriteHeader(http.StatusNotFound)
 }
 
-func main() {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	serverPort := os.Getenv("SERVER_PORT")
-
-	var err error
+func createDB() (conn *pgxpool.Pool, err error) {
 	for {
 		retries := 1
 
 		fmt.Println("Tentativa conectar banco: ", retries)
 
-		dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+		dsn := fmt.Sprintf(
+			"postgres://%s:%s@%s:%s/%s",
+			os.Getenv("DB_USER"),
+			os.Getenv("DB_PASSWORD"),
+			os.Getenv("DB_HOST"),
+			os.Getenv("DB_PORT"),
+			os.Getenv("DB_NAME"),
+		)
 		conn, err = pgxpool.New(context.Background(), dsn)
 
 		if err == nil || retries > 5 {
@@ -76,14 +80,23 @@ func main() {
 		retries += 1
 	}
 
+	return
+}
+
+func main() {
+	conn, err := createDB()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro ao conectar com o banco de dados: %v\n", err)
-		return
 	}
+
 	defer conn.Close()
 
-	http.HandleFunc("/clientes/", handleCliente)
+	app := &App{
+		conn: conn,
+	}
+	http.HandleFunc("/clientes/", app.handleCliente)
 
+	serverPort := os.Getenv("SERVER_PORT")
 	fmt.Printf("Servidor rodando na porta %s...\n", serverPort)
 
 	err = http.ListenAndServe(":"+serverPort, nil)

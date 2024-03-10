@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const QUERY_CREDITAR = "UPDATE cliente SET saldo = saldo + $1 WHERE id = $2 RETURNING nome, saldo, limite"
@@ -25,7 +23,7 @@ const QUERY_INSERIR_TRANSACAO_DEBITAR = "WITH cliente_atualizado AS (%s) " +
 	"FROM cliente_atualizado " +
 	"RETURNING limite_atual, saldo_atual"
 
-func handleTransacao(clienteId int, conn *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
+func (app *App) handleTransacao(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -47,19 +45,19 @@ func handleTransacao(clienteId int, conn *pgxpool.Pool, w http.ResponseWriter, r
 	var argsQuery []any
 	if transacao.Tipo == "c" {
 		updateQuery = QUERY_CREDITAR
-		argsQuery = append(argsQuery, transacao.Valor, clienteId)
+		argsQuery = append(argsQuery, transacao.Valor, app.clienteId)
 		updateQuery = fmt.Sprintf(QUERY_INSERIR_TRANSACAO_CREDITAR, updateQuery)
 	} else {
 		updateQuery = QUERY_DEBITAR
-		argsQuery = append(argsQuery, transacao.Valor, clienteId, transacao.Valor)
+		argsQuery = append(argsQuery, transacao.Valor, app.clienteId, transacao.Valor)
 		updateQuery = fmt.Sprintf(QUERY_INSERIR_TRANSACAO_DEBITAR, updateQuery)
 	}
 
-	argsQuery = append(argsQuery, clienteId, transacao.Valor, transacao.Tipo, transacao.Descricao)
+	argsQuery = append(argsQuery, app.clienteId, transacao.Valor, transacao.Tipo, transacao.Descricao)
 
 	var novoLimite int
 	var novoSaldo int
-	err = conn.QueryRow(context.Background(), updateQuery, argsQuery...).Scan(&novoLimite, &novoSaldo)
+	err = app.conn.QueryRow(context.Background(), updateQuery, argsQuery...).Scan(&novoLimite, &novoSaldo)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erro transacao: %v\n", err)
