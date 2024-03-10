@@ -13,8 +13,7 @@ import (
 )
 
 type App struct {
-	conn      *pgxpool.Pool
-	clienteId int
+	conn *pgxpool.Pool
 }
 
 func (app *App) handleCliente(w http.ResponseWriter, r *http.Request) {
@@ -42,13 +41,11 @@ func (app *App) handleCliente(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.clienteId = id
-
 	if parts[3] == "transacoes" {
-		app.handleTransacao(w, r)
+		app.handleTransacao(id, w, r)
 		return
 	} else if parts[3] == "extrato" {
-		app.handleExtrato(w, r)
+		app.handleExtrato(id, w, r)
 		return
 	}
 

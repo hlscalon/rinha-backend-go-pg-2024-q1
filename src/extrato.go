@@ -15,13 +15,13 @@ const QUERY_OBTER_TRANSACOES = "SELECT valor, tipo, descricao, realizada_em, lim
 	"ORDER BY id DESC " +
 	"LIMIT 11 " // Deve pegar uma a mais para ignorar a inicial depois, se necessário
 
-func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
+func (app *App) handleExtrato(clienteId int, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	rows, err := app.conn.Query(context.Background(), QUERY_OBTER_TRANSACOES, app.clienteId)
+	rows, err := app.conn.Query(context.Background(), QUERY_OBTER_TRANSACOES, clienteId)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return

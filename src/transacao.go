@@ -22,7 +22,7 @@ const QUERY_INSERIR_TRANSACAO_DEBITAR = "WITH cliente_atualizado AS (%s) " +
 	"FROM cliente_atualizado " +
 	"RETURNING limite_atual, saldo_atual"
 
-func (app *App) handleTransacao(w http.ResponseWriter, r *http.Request) {
+func (app *App) handleTransacao(clienteId int, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -44,15 +44,15 @@ func (app *App) handleTransacao(w http.ResponseWriter, r *http.Request) {
 	var argsQuery []any
 	if transacao.Tipo == "c" {
 		updateQuery = QUERY_CREDITAR
-		argsQuery = append(argsQuery, transacao.Valor, app.clienteId)
+		argsQuery = append(argsQuery, transacao.Valor, clienteId)
 		updateQuery = fmt.Sprintf(QUERY_INSERIR_TRANSACAO_CREDITAR, updateQuery)
 	} else {
 		updateQuery = QUERY_DEBITAR
-		argsQuery = append(argsQuery, transacao.Valor, app.clienteId, transacao.Valor)
+		argsQuery = append(argsQuery, transacao.Valor, clienteId, transacao.Valor)
 		updateQuery = fmt.Sprintf(QUERY_INSERIR_TRANSACAO_DEBITAR, updateQuery)
 	}
 
-	argsQuery = append(argsQuery, app.clienteId, transacao.Valor, transacao.Tipo, transacao.Descricao)
+	argsQuery = append(argsQuery, clienteId, transacao.Valor, transacao.Tipo, transacao.Descricao)
 
 	var novoLimite int
 	var novoSaldo int
