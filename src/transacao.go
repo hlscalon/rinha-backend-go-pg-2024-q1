@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 )
 
 const QUERY_CREDITAR = "UPDATE cliente SET saldo = saldo + $1 WHERE id = $2 RETURNING nome, saldo, limite"
@@ -60,8 +59,6 @@ func (app *App) handleTransacao(w http.ResponseWriter, r *http.Request) {
 	err = app.conn.QueryRow(context.Background(), updateQuery, argsQuery...).Scan(&novoLimite, &novoSaldo)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro transacao: %v\n", err)
-		fmt.Fprintf(os.Stderr, "args: %v\n", argsQuery)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -75,7 +72,6 @@ func (app *App) handleTransacao(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro encoding: %v\n", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 	}
 }

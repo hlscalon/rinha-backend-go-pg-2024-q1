@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -25,7 +23,6 @@ func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := app.conn.Query(context.Background(), QUERY_OBTER_TRANSACOES, app.clienteId)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro extrato: %v\n", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -33,7 +30,6 @@ func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 	ultimasTransacoes, err := pgx.CollectRows(rows, pgx.RowToStructByName[TransacaoExtratoResponse])
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro extrato transacoes: %v\n", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -65,7 +61,6 @@ func (app *App) handleExtrato(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro encoding: %v\n", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
 	}
 }
