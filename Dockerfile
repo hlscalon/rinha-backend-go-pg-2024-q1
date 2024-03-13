@@ -19,5 +19,4 @@ COPY --from=build /usr/app .
 
 CMD ["/usr/app/server"]
 
-# verificar necessidade
 EXPOSE 9000

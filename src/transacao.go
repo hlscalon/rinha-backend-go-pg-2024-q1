@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-const QUERY_CREDITAR = "UPDATE cliente SET saldo = saldo + $1 WHERE id = $2 RETURNING nome, saldo, limite"
-const QUERY_DEBITAR = "UPDATE cliente SET saldo = saldo - $1 WHERE id = $2 AND saldo - $3 >= -ABS(limite) RETURNING nome, saldo, limite"
+const QUERY_CREDITAR = "UPDATE cliente SET saldo = saldo + $1 WHERE id = $2 RETURNING saldo, limite"
+const QUERY_DEBITAR = "UPDATE cliente SET saldo = saldo - $1 WHERE id = $2 AND saldo - $3 >= -ABS(limite) RETURNING saldo, limite"
 
 const QUERY_INSERIR_TRANSACAO_CREDITAR = "WITH cliente_atualizado AS (%s) " +
 	"INSERT INTO transacao (cliente_id, valor, tipo, descricao, limite_atual, saldo_atual) " +

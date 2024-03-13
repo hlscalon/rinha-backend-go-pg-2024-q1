@@ -6,8 +6,6 @@ CREATE UNLOGGED TABLE cliente (
 	saldo INTEGER NOT NULL DEFAULT 0
 );
 
--- Verificar índices cliente
-
 CREATE UNLOGGED TABLE transacao (
 	id SERIAL PRIMARY KEY,
 	cliente_id INTEGER NOT NULL,
