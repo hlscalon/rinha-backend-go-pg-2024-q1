@@ -4,6 +4,6 @@
 
 ### Tecnlogias utilizadas
 
-#### Go
-#### PostgreSQL
-#### Nginx
+- Go
+- PostgreSQL
+- Nginx
